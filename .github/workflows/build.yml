@@ -11,8 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Pilih Xcode 16
-        run: sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+      - name: Periksa Xcode yang tersedia
+        run: |
+          ls -d /Applications/*.app
+          xcodebuild -version
 
       - name: Pasang XcodeGen
         run: brew install xcodegen
