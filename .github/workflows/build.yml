@@ -1,0 +1,43 @@
+name: Build IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pilih Xcode 15.4
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Pasang XcodeGen
+        run: brew install xcodegen
+
+      - name: Buat proyek Xcode
+        run: xcodegen generate
+
+      - name: Build (tanpa tanda tangan)
+        run: |
+          xcodebuild \
+            -project PhoneWebcam.xcodeproj \
+            -scheme PhoneWebcam \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      - name: Bungkus jadi IPA
+        run: |
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/PhoneWebcam.app Payload/
+          zip -qr PhoneWebcam.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhoneWebcam-ipa
+          path: PhoneWebcam.ipa
